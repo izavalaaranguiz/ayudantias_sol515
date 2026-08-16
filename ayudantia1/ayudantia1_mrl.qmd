@@ -18,6 +18,8 @@ execute:
   warning: false
   message: false
 ---
+
+## Objetivos de la ayudantía
 ```{=html}
 <style>
 .reveal .slides {
@@ -48,7 +50,7 @@ sysfonts::font_add(
 showtext::showtext_auto()
 ```
 
-## Objetivos de la ayudantía
+
 - Repasar el uso básico de RStudio
 - Explorar y recodificar una base de datos real
 - Estimar un modelo de regresión lineal simple
