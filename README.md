@@ -13,3 +13,4 @@ lectura de `summary()`, cálculo de valores predichos y visualización de result
 
 [Presentación]()
 "# ayudantias_sol515" 
+"# ayudantias_sol515" 

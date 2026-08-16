@@ -1,0 +1,12 @@
+/*-- scss:defaults --*/
+
+$font-family-sans-serif: "Gill Sans MT", "Gill Sans", "Calibri", sans-serif !default;
+$presentation-heading-font: "Gill Sans MT", "Gill Sans", "Calibri", sans-serif !default;
+$presentation-font-size-root: 34px !default;
+
+/*-- scss:rules --*/
+
+.reveal .slide-logo {
+  max-height: 60px;
+  max-width: 120px;
+}

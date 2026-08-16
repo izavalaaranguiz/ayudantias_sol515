@@ -1,0 +1,328 @@
+---
+title: "Regresión Lineal Simple"
+subtitle: |
+  Ayudantía 1 — Modelos de Regresión (SOL515)<br>
+  <a href="mailto:ignacio.zavala@uc.cl">ignacio.zavala@uc.cl</a> ·
+  <a href="https://github.com/izavalaaranguiz/ayudantias_sol515">GitHub</a>
+author: "Ignacio Zavala Aránguiz"
+
+format:
+  revealjs:
+    logo: logopuc.png
+    theme: [default, tema.scss]
+    slide-number: true
+    transition: slide
+    incremental: false
+    code-line-numbers: false
+
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{=html}
+<style>
+.reveal .slide-logo {
+  max-height: 40px;   /* ajusta tamaño */
+  max-width: 100px;
+}
+.reveal .slides {
+  font-size: 0.85em;
+}
+.reveal pre code {
+  font-size: 1.0em;
+}
+.reveal .slides section.smaller pre code {
+  font-size: 18px !important;   /* ajusta este valor a gusto */
+  line-height: 1.0 !important;
+}
+</style>
+```
+
+```{r}
+#| label: setup-fuentes
+#| include: false
+
+library(systemfonts)
+library(sysfonts)
+
+sysfonts::font_add(
+  family  = "Gill Sans MT",
+  regular = "GIL_____.TTF",
+  bold    = "GILB____.TTF",
+  italic  = "GILI____.TTF"
+)
+showtext::showtext_auto()
+```
+
+
+## Objetivos de la ayudantía
+
+- Repasar el uso básico de RStudio
+- Explorar y recodificar una base de datos real
+- Estimar un modelo de regresión lineal simple
+- Leer e interpretar el output de `lm()`
+- Visualizar valores predichos y residuos
+
+------------------------------------------------------------------------
+
+## Repaso de RStudio
+
+::: fragment
+**Consola / Script / Entorno / Archivos-Plots**
+
+![](entorno.jpg){fig-align="center" width="70%"}
+:::
+
+------------------------------------------------------------------------
+
+## El caso: prestigio ocupacional en Canadá (1971) {.smaller}
+
+::: fragment
+**Pregunta:** ¿los ingresos varían según composición de género? 
+:::
+
+::: fragment
+Trabajaremos con **`Prestige`**, del paquete **`carData`**. Contiene 102 ocupaciones del **Censo de Canadá de 1971**, cada una con:
+
+- `education`: años promedio de educación de quienes ejercen esa ocupación
+- `income`: ingreso promedio (dólares de 1971)
+- `women`: % de mujeres en la ocupación
+- `prestige`: puntaje de prestigio social (encuesta de mediados de los 60')
+- `type`: tipo de ocupación (*bc* = blue collar, *wc* = white collar, *prof* = profesional)
+:::
+
+::: fragment
+```{r}
+#| eval: true
+options(scipen = 999) # Quitamos notación científica
+library(carData) # Cargamos el paquete con nuestra base de datos 
+data(Prestige) # Guardamos la base en el entorno
+head(Prestige)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Exploración de los datos {.smaller}
+
+::: fragment
+Antes de modelar, siempre se revisa la base: rangos, valores perdidos, tipo de cada variable. Esto evita sorpresas al momento de estimar.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+summary(Prestige)
+```
+:::
+
+::: fragment
+Dejaremos fuera las ocupaciones con ingresos superiores a $15.000 — 
+unas pocas observaciones de ingresos muy altos que podrían distorsionar 
+la recta y dificultar la lectura del gráfico.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+# Base R
+Prestige <- Prestige[Prestige$income <= 15000, ]
+```
+:::
+
+::: fragment
+```{r}
+#| eval: true
+library(tidyverse)
+# tidyverse — mismo resultado
+Prestige <- Prestige %>% 
+  filter(income <= 15000)
+```
+:::
+
+
+
+------------------------------------------------------------------------
+
+## ¿Qué es un modelo de regresión lineal? {.smaller}
+
+::: fragment
+Es una técnica que describe **cómo cambia una variable dependiente **$Y$) según cuánto cambia una variable independiente ($X$), asumiendo una relación de forma lineal (una línea recta).
+:::
+
+::: fragment
+$$Y = \beta_0 + \beta_1 X + \varepsilon$$
+
+- $Y$: variable dependiente (**`income`**)
+- $X$: variable independiente (**`women`**)
+- $\beta_0$ ($\alpha$): intercepto, valor esperado de $Y$ cuando $X=0$
+- $\beta_1$ : coeficiente de $X$, cuánto cambia $Y$ por cada unidad adicional en la escala de $X$
+- $\varepsilon$ ($\mu$): Término error, aquello que el modelo no explica
+:::
+
+::: fragment
+$$\texttt{income} = \beta_0 + \beta_1 \cdot \texttt{women} + \varepsilon$$
+:::
+
+------------------------------------------------------------------------
+
+## Modelo teórico vs. estimado {.smaller}
+
+::: fragment
+**Poblacional (teórico):** 
+
+$$Y = \beta_0 + \beta_1 X + \varepsilon$$
+
+describe la relación "verdadera" en la población, que nunca observamos directamente.
+:::
+
+::: fragment
+**Estimado (muestral):** 
+$$\hat{Y} = \hat{\beta_0} + \hat{\beta_1} X$$ 
+
+lo que calculamos con nuestros datos; $\hat{\alpha}$ y $\hat{\beta}$ son *estimaciones* de $\beta_0$ y $\beta_1$.
+:::
+
+::: fragment
+**Residuo:** $$\hat{\varepsilon} = Y - \hat{Y}$$ 
+
+la distancia entre el **valor observado** y el **valor que el modelo predice** para esa observación.
+:::
+
+------------------------------------------------------------------------
+
+## El estimador OLS {.smaller}
+
+::: fragment
+**OLS** (*Ordinary Least Squares*, Mínimos Cuadrados Ordinarios) es el procedimiento con el que calcularemos nuestro intercepto $\hat{\beta_0}$ y coeficiente $\hat{\beta_1}$.
+
+![](ols.gif){fig-align="center" width="50%"}
+:::
+
+::: fragment
+**Idea central:** de todas las rectas posibles, OLS estima la que **minimiza la suma de los residuos al cuadrado**. Es decir, la recta que en promedio *se aleja menos de los puntos observados*.
+
+(Se elevan al cuadrado para que residuos positivos y negativos no se cancelen entre sí, y para penalizar más los errores grandes.)
+:::
+
+
+---
+
+## Estimación en R {.smaller}
+
+::: {.fragment}
+```{r}
+modelo <- lm(income ~ women, data = Prestige)
+```
+
+`lm()` (*linear model*) recibe la fórmula `Y ~ X` y el dataframe, y 
+calcula $\hat{\beta_0}$ y $\hat{\beta_1}$ vía OLS.
+:::
+
+::: {.fragment}
+```{r}
+summary(modelo)
+```
+:::
+
+::: fragment
+**Intercepto ($\hat{\beta_0}$):** el ingreso promedio esperado en una 
+ocupación con **0% de mujeres** (o en una ocupación completamente masculinizadas) es de 7557.42 dólares.
+:::
+
+::: fragment
+**Coeficiente ($\hat{\beta_1}$):** por cada punto porcentual adicional 
+de mujeres en una ocupación, el ingreso promedio **disminuye** en 
+46.15 dólares.
+:::
+
+---
+
+## Calculando valores predichos {.smaller}
+
+::: fragment
+Con la ecuación estimada podemos predecir el ingreso esperado $\hat{\texttt{income}}$ para 
+cualquier % de mujeres observado en $\texttt{women}$:
+
+$$\hat{\texttt{income}} = \hat{\beta_0} + \hat{\beta_1} \cdot \texttt{women}$$
+:::
+
+::: fragment
+**Manualmente**, para 25%, 50%, 75% y 100% de mujeres:
+
+$$\hat{\texttt{income}}_{25} = `r round(coef(modelo)[1],2)` + `r round(coef(modelo)[2],2)` \times 25$$
+:::
+::: fragment
+$$\hat{\texttt{income}}_{50} = `r round(coef(modelo)[1],2)` + `r round(coef(modelo)[2],2)` \times 50$$
+::: 
+::: fragment
+$$\hat{\texttt{income}}_{75} = `r round(coef(modelo)[1],2)` + `r round(coef(modelo)[2],2)` \times 75$$
+:::
+::: fragment
+$$\hat{\texttt{income}}_{100} = `r round(coef(modelo)[1],2)` + `r round(coef(modelo)[2],2)` \times 100$$
+:::
+
+::: fragment
+**En R**, con `predict()`:
+
+```{r}
+#| eval: true
+val_pred <- data.frame(women = c(25, 50, 75, 100))
+predict(modelo, newdata = val_pred)
+```
+:::
+
+---
+
+## Visualización: recta ajustada {.smaller}
+
+::: {.fragment}
+Cada punto es una ocupación real; la línea roja es la recta estimada 
+por OLS — la síntesis del modelo en una imagen.
+
+
+```{r}
+plot(Prestige$women, Prestige$income,
+     xlab = "% Mujeres", ylab = "Ingresos")
+abline(modelo, col = "red")
+```
+:::
+
+
+---
+
+## Predichos y residuos{.smaller}
+
+```{r}
+#| echo: false
+#| eval: true
+#| message: false
+library(ggplot2)
+library(plotly)
+Prestige$pred <- predict(modelo)
+p <- ggplot(Prestige, aes(x = women, y = income)) +
+  geom_point() +
+  geom_segment(aes(xend = women, yend = pred), 
+               color = "grey60", linetype = "dashed") +
+  geom_line(aes(y = pred), color = "red", linewidth = 1) +
+  labs(x = "% Mujeres", y = "Ingresos") +
+  theme(text = element_text(family = "Gill Sans MT"))
+
+ggplotly(p)
+```
+
+::: {.fragment}
+
+En este caso, los puntos negros representan los **valores observados** de $Y$, mientras que la línea recta representa los **valores predichos** $\hat{Y}$ estimados mediante OLS.
+
+Las líneas punteadas representan los **residuos**, es decir, la diferencia entre el valor observado $Y$ y el valor predicho $\hat{Y}$. $\hat{\varepsilon} = Y - \hat{Y}$
+
+:::
+
+---
+
+**Muchas gracias!**
+
+Todas mis ayudantías y materiales disponibles en [**mi repositorio de GitHub**](https://github.com/izavalaaranguiz/ayudantias_sol515)
