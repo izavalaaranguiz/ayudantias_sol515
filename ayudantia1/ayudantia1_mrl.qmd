@@ -12,26 +12,25 @@ format:
     transition: slide
     incremental: false
     code-line-numbers: false
-    include-in-header:
-      text: |
-        <style>
-        .reveal .slides {
-          font-size: 0.85em;
-        }
-        .reveal pre code {
-          font-size: 1.0em;
-        }
-        .reveal .slides section.smaller pre code {
-          font-size: 22px !important;
-          line-height: 1.3 !important;
-        }
-        </style>
+    logo: logopuc.png
 execute:
   echo: true
   warning: false
   message: false
 ---
-
+```{=html}
+<style>
+.reveal .slides {
+  font-size: 0.85em;
+}
+.reveal pre {
+  font-size: 0.6em !important;
+}
+.reveal .slides section.smaller pre {
+  font-size: 0.75em !important;
+}
+</style>
+```
 
 ```{r}
 #| label: setup-fuentes
