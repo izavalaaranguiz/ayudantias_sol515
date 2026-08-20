@@ -91,7 +91,7 @@ Trabajaremos con **`Prestige`**, del paquete **`carData`**. Contiene 102 ocupaci
 options(scipen = 999) # Quitamos notación científica
 library(carData) # Cargamos el paquete con nuestra base de datos 
 data(Prestige) # Guardamos la base en el entorno
-head(Prestige)
+head(Prestige, n=10)
 ```
 :::
 
