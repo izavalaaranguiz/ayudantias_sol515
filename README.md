@@ -11,5 +11,6 @@
 y su aplicación práctica en `RStudio` (exploración de datos, estimación con `lm()`,
 lectura de `summary()`, cálculo de valores predichos y visualización de resultados).
 
-[Ayudantía 1 — Regresión Lineal Simple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia1_mrl.html)
+[Ayudantía 1 — Regresión Lineal Simple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia1/ayudantia1_mrl.html)
+
 
