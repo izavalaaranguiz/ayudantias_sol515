@@ -72,7 +72,7 @@ showtext::showtext_auto()
 ## El caso: prestigio ocupacional en Canadá (1971) {.smaller}
 
 ::: fragment
-**Pregunta:** ¿los ingresos varían según composición de género? 
+**Pregunta:** ¿los ingresos de una ocupación varían según su composición de género? 
 :::
 
 ::: fragment
@@ -94,6 +94,7 @@ data(Prestige) # Guardamos la base en el entorno
 head(Prestige)
 ```
 :::
+
 
 ------------------------------------------------------------------------
 
@@ -141,7 +142,7 @@ Prestige <- Prestige %>%
 ## ¿Qué es un modelo de regresión lineal? {.smaller}
 
 ::: fragment
-Es una técnica que describe **cómo cambia una variable dependiente **$Y$) según cuánto cambia una variable independiente ($X$), asumiendo una relación de forma lineal (una línea recta).
+Es una técnica que describe **cómo cambia una variable dependiente ** $Y$ según cuánto cambia una variable independiente $X$, asumiendo una relación de forma **lineal** (una línea recta).
 :::
 
 ::: fragment
@@ -194,9 +195,13 @@ la distancia entre el **valor observado** y el **valor que el modelo predice** p
 :::
 
 ::: fragment
-**Idea central:** de todas las rectas posibles, OLS estima la que **minimiza la suma de los residuos al cuadrado**. Es decir, la recta que en promedio *se aleja menos de los puntos observados*.
+**Idea central:** de todas las rectas posibles, OLS estima la que **minimiza la suma de los residuos al cuadrado**. Es decir, la recta que en promedio *se aleja menos de los puntos observados*. (Se elevan al cuadrado para que residuos positivos y negativos no se cancelen entre sí, y para penalizar más los errores grandes.)
+:::
 
-(Se elevan al cuadrado para que residuos positivos y negativos no se cancelen entre sí, y para penalizar más los errores grandes.)
+::: fragment
+$$\hat{\beta_1} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2} = \frac{\text{cov}(x, y)}{\text{var}(x)}$$
+
+$$\hat{\beta_0} = \bar{y} - \hat{\beta_1}\bar{x}$$
 :::
 
 
@@ -229,6 +234,118 @@ ocupación con **0% de mujeres** (o en una ocupación completamente masculinizad
 de mujeres en una ocupación, el ingreso promedio **disminuye** en 
 46.15 dólares.
 :::
+
+
+---
+
+## Estimación en R {.smaller}
+
+::: fragment
+El coeficiente $\hat{\beta_1}$ es la covarianza entre $X$ e $Y$, estandarizada por la varianza de $X$:
+
+$$\hat{\beta_1} = \frac{\text{cov}(X,Y)}{\text{var}(X)}$$
+
+**Intuición:** mide cuánto tienden a moverse *juntas* $X$ e $Y$ (la covarianza), ajustado por cuánto varía $X$ por sí sola. Por eso el coeficiente está en la **escala original** de $Y$ por **unidad de la escala** de $X$.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+cov(Prestige$women, Prestige$income) / var(Prestige$women)
+```
+:::
+
+::: fragment
+El intercepto $\hat{\beta_0}$ se calcula a partir de las medias de $X$ e $Y$ y del coeficiente ya estimado:
+
+$$\hat{\beta_0} = \bar{y} - \hat{\beta_1}\bar{x}$$
+
+**Intuición:** es el ajuste necesario para que la recta pase exactamente por el punto promedio de los datos ($\bar{x}$, $\bar{y}$) — dado el $\hat{\beta_1}$ ya calculado, el intercepto "corrige" la altura de la recta para que, en promedio, las predicciones no queden ni sistemáticamente por encima ni por debajo de los valores observados.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+mean(Prestige$income) - (-46.1516) * mean(Prestige$women)
+```
+:::
+
+::: {.fragment}
+::: {.callout-important}
+## Ojo con la escala de las variables
+
+La interpretación de un coeficiente siempre depende de la **unidad de medida** de $X$ e $Y$. En nuestro modelo, `women` está en puntos porcentuales (0-100) e `income` en dólares. Por eso el coeficiente se lee como **"dólares de cambio por cada punto porcentual adicional de mujeres*"**. Si `women` estuviera en proporción (0-1) en vez de puntos porcentaje, el mismo efecto real se vería reflejado en un coeficiente 100 veces más grande, aunque la relación entre las variables no cambió en absoluto.
+:::
+:::
+
+
+
+
+
+## Ajuste del modelo: R² {.smaller}
+
+::: fragment
+El **R² no ajustado** (coeficiente de determinación) mide qué proporción de la varianza de $Y$ es explicada por el modelo, es decir, por $X$.
+:::
+
+::: fragment
+$$R^2 = \frac{SSE}{SST} = 1 - \frac{SSR}{SST}$$
+
+- **SST** (suma total de cuadrados): varianza total de $Y$
+- **SSE** (suma explicada de cuadrados): parte de esa varianza que el modelo sí explica
+- **SSR** (suma residual de cuadrados): parte que el modelo *no* explica (los residuos)
+:::
+
+::: fragment
+$$SST = \sum_{i=1}^{n}(y_i - \bar{y})^2 \qquad SSE = \sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2 \qquad SSR = \sum_{i=1}^{n}\hat{\varepsilon}_i^2$$
+
+*(Nota: $SST = SSE + SSR$)*
+:::
+
+::: fragment
+Va de 0 a 1 (o 0% a 100%): valores cercanos a 1 indican que el modelo explica casi toda la varianza de $Y$; cercanos a 0, que explica muy poco.
+:::
+
+---
+
+## Calculando el R² en R {.smaller}
+
+::: fragment
+**Opción 1: Calculando SSE y SSR manualmente:**
+
+```{r}
+#| eval: true
+sse <- sum((fitted(modelo) - mean(Prestige$income))^2)  # SSE
+ssr <- sum((fitted(modelo) - Prestige$income)^2)        # SSR
+
+1 - (ssr / (sse + ssr))
+```
+:::
+
+::: fragment
+**Opción 2: extraerlo directo del modelo:**
+
+```{r}
+#| eval: true
+summary(modelo)$r.squared
+```
+:::
+
+::: fragment
+**Dato clave:** en regresión simple (**una sola variable independiente**), el R² no ajustado es la **correlación entre $X$ e $Y$ al cuadrado**:
+
+$$R^2 = r^2$$
+
+```{r}
+#| eval: true
+cor(Prestige$women, Prestige$income, use = "complete.obs")^2
+```
+:::
+
+::: fragment
+**Interpretación:** el % de mujeres en una ocupación explica aproximadamente un **26,3%** de la varianza en el ingreso promedio de esa ocupación. El 73,7% restante se debe a **otros factores no incluidos** en este modelo simple (tipo de ocupación, años de escolaridad, etc.).
+:::
+
 
 ---
 
