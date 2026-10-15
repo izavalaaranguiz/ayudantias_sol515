@@ -1,0 +1,521 @@
+---
+title: "Regresión Lineal Simple"
+subtitle: |
+  Ayudantía 2 — Modelos de Regresión (SOL515)<br>
+  <a href="mailto:ignacio.zavala@uc.cl">ignacio.zavala@uc.cl</a> ·
+  <a href="https://github.com/izavalaaranguiz/ayudantias_sol515">GitHub</a>
+author: "Ignacio Zavala Aránguiz"
+format:
+  revealjs:
+    theme: [default, tema.scss]
+    slide-number: true
+    transition: slide
+    incremental: false
+    code-line-numbers: false
+    logo: logopuc.png
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Objetivos de la ayudantía
+```{=html}
+<style>
+.reveal .slides {
+  font-size: 0.85em;
+}
+.reveal pre {
+  font-size: 0.6em !important;
+}
+.reveal .slides section.smaller pre {
+  font-size: 0.75em !important;
+}
+</style>
+```
+
+```{r}
+#| label: setup-fuentes
+#| include: false
+setwd("~/OneDrive - Universidad Católica de Chile/Nacho UC/Sociología UC (2021-2024)/Magíster 2025/Ayudantías 12vo Semestre/Modelos de Regresión/ayudantias/ayudantia2")
+library(systemfonts)
+library(sysfonts)
+
+sysfonts::font_add(
+  family  = "Gill Sans MT",
+  regular = "GIL_____.TTF",
+  bold    = "GILB____.TTF",
+  italic  = "GILI____.TTF"
+)
+showtext::showtext_auto()
+```
+
+
+- Limpiar y preparar una base de datos
+- Estimar un modelo de regresión múltiple
+- Interpretar coeficientes y bondad de ajuste
+- Estimar e interpretar intervalos de confianza
+- Presentar los resultados en tabla y gráfico
+
+------------------------------------------------------------------------
+
+## El caso: visitas de videos de YouTube {.smaller}
+
+::: fragment
+**Pregunta:** ¿qué características de un video se asocian con su número de visitas?
+:::
+
+::: fragment
+Trabajaremos con **`viral_videos`**, una base de [Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data) con 12.000 videos **simulados** (no son datos reales de YouTube), cada uno con:
+
+- `views`: número de visitas del video
+- `duration_sec`: duración del video (en segundos)
+- `title_length`: número de caracteres del título
+- `subscriber_count`: número de suscriptores del canal
+:::
+
+::: fragment
+```{r}
+#| eval: true
+options(scipen = 999) # Quitamos notación científica
+library(texreg)       # Tablas de regresión: screenreg()
+library(car)          # Intervalos de confianza: Confint()
+library(coefplot)     # Gráfico de coeficientes: coefplot()
+
+# Cargamos la base (el .csv está en la misma carpeta de nuestro directorio)
+videos <- read.csv("viral_videos.csv")
+head(videos[, c("views", "duration_sec", "title_length", "subscriber_count")], n = 10)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Exploración: la variable dependiente {.smaller}
+
+::: fragment
+Antes de modelar, revisamos las visitas (`views`), nuestra variable dependiente.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+summary(videos$views)
+```
+:::
+
+::: fragment
+La media (767.752) es mucho mayor que la mediana (185.268): unos pocos videos con millones de visitas tiran la media hacia arriba.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+#| fig-height: 3.5
+hist(videos$views, breaks = 100,
+     main = "Visitas por video", xlab = "Visitas")
+```
+:::
+
+------------------------------------------------------------------------
+
+## Casos extremos y escala de las visitas {.smaller}
+
+::: fragment
+Igual que en la ayudantía 1, dejaremos fuera los casos extremos: nos quedamos con los videos de **hasta 1 millón de visitas**.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+videos <- videos[videos$views <= 1000000, ]
+nrow(videos)   # 10.161 videos
+```
+:::
+
+::: fragment
+Además, expresamos las visitas en **miles** para que los coeficientes sean legibles.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+videos$visitas <- videos$views / 1000
+summary(videos$visitas)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Visitas después de la limpieza {.smaller}
+
+```{r}
+#| eval: true
+#| fig-height: 4.5
+hist(videos$visitas, breaks = 50,
+     main = "Visitas por video (menos de 1 millón)", xlab = "Visitas (miles)")
+```
+
+------------------------------------------------------------------------
+
+## Predictores continuos {.smaller}
+
+::: fragment
+**Duración:** viene en segundos, la pasamos a **minutos**.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+videos$duracion <- videos$duration_sec / 60
+summary(videos$duracion)
+```
+:::
+
+::: fragment
+**Largo del título:** número de caracteres.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+videos$largo_titulo <- videos$title_length
+summary(videos$largo_titulo)
+```
+:::
+
+::: fragment
+**Suscriptores:** los pasamos a **decenas de miles** (dividimos por 10.000).
+:::
+
+::: fragment
+```{r}
+#| eval: true
+videos$suscriptores <- videos$subscriber_count / 10000
+summary(videos$suscriptores)
+```
+:::
+
+------------------------------------------------------------------------
+
+## El modelo de regresión múltiple {.smaller}
+
+::: fragment
+Ahora tenemos **más de un predictor**: la duración, el largo del título y el tamaño del canal.
+:::
+
+::: fragment
+$$\texttt{visitas} = \beta_0 + \beta_1 \texttt{duracion} + \beta_2 \texttt{largo\_titulo} + \beta_3 \texttt{suscriptores} + \varepsilon$$
+
+- **Modelo 1:** solo la duración
+- **Modelo 2:** duración controlando por el largo del título
+- **Modelo 3:** además controlamos por los suscriptores del canal
+:::
+
+------------------------------------------------------------------------
+
+## Estimación en R {.smaller}
+
+::: fragment
+Estimamos modelos que **van sumando predictores** (como en clases):
+
+```{r}
+m1 <- lm(visitas ~ duracion, data = videos)
+m2 <- lm(visitas ~ duracion + largo_titulo, data = videos)
+m3 <- lm(visitas ~ duracion + largo_titulo + suscriptores, data = videos)
+```
+:::
+
+::: fragment
+En la fórmula, los predictores se **suman con `+`**.
+:::
+
+
+::: fragment
+```{r}
+summary(m3)
+```
+:::
+
+::: fragment
+Por ahora nos fijamos solo en la columna **`Estimate`** y en las líneas finales (*Residual standard error* y *R-squared*).
+:::
+
+------------------------------------------------------------------------
+
+## Comparación de modelos {.smaller}
+
+::: fragment
+Comparamos los tres modelos lado a lado:
+
+```{r}
+#| eval: true
+screenreg(l = list(m1, m2, m3),
+          single.row = FALSE,
+          stars = numeric(0),
+          )
+```
+:::
+
+------------------------------------------------------------------------
+
+## Interpretación: ¿Qué pasa con el coeficiente de duración? {.smaller}
+
+::: fragment
+```{r}
+#| eval: true
+# ¿Qué pasa con el coeficiente de duración entre m1 y m3?
+coef(m1)["duracion"]
+coef(m3)["duracion"]
+```
+:::
+
+::: fragment
+Pasa de -6,1 a -2,1: parte de la asociación negativa entre duración y visitas se debe al tamaño del canal (los videos más largos tienden a estar en canales más pequeños). Al **controlar por suscriptores**, el coeficiente cambia.
+:::
+
+
+::: fragment
+```{r}
+#| eval: true
+coef(m3)
+```
+:::
+
+::: fragment
+**Intercepto ($\hat{\beta_0}$):** para un video de 0 minutos, título de 0 caracteres y canal sin suscriptores, se esperan 143.090 visitas. Es un valor de referencia, sin interpretación sustantiva por sí solo.
+:::
+
+::: fragment
+**Duración ($\hat{\beta_1}$):** por cada minuto adicional, las visitas esperadas **disminuyen** en 2.070 aprox., manteniendo constantes las demás variables (*ceteris paribus*).
+:::
+
+::: fragment
+**Largo del título ($\hat{\beta_2}$):** por cada caracter adicional, las visitas esperadas **aumentan** en 270 aprox., manteniendo constante el resto.
+:::
+
+::: fragment
+**Suscriptores ($\hat{\beta_3}$):** por cada 10.000 suscriptores adicionales del canal, las visitas esperadas **aumentan** en 1.690 aprox., manteniendo constante el resto.
+:::
+
+------------------------------------------------------------------------
+
+## Bondad de ajuste: R² {.smaller}
+
+::: fragment
+```{r}
+#| eval: true
+summary(m3)$r.squared       # R²
+summary(m3)$adj.r.squared   # R² ajustado (penaliza por cada predictor extra)
+```
+:::
+
+::: fragment
+**Interpretación:** el modelo explica cerca de un **28%** de la varianza de las visitas. El 72% restante depende de factores que no incluimos.
+:::
+
+::: fragment
+```{r}
+#| eval: true
+# ¿Cuánto mejora el ajuste al ir sumando predictores?
+summary(m1)$r.squared
+summary(m2)$r.squared
+summary(m3)$r.squared
+```
+:::
+
+::: fragment
+Casi todo el salto viene de los **suscriptores**: las visitas de un video se asocian con la popularidad del canal.
+:::
+
+------------------------------------------------------------------------
+
+## Intervalos de confianza: en R {.smaller}
+
+::: fragment
+Al 95 \% de confianza (con $\alpha = 0,05$)
+```{r}
+#| eval: true
+confint(m3)   # R base
+Confint(m3)   # Paquete car: agrega la columna con el coeficiente
+```
+:::
+
+::: fragment
+**Duración:** con un 95% de confianza, por cada minuto adicional las visitas esperadas disminuyen entre 1.200 y 2.900, manteniendo constante el resto de las variables.
+:::
+
+::: fragment
+**Largo del título:** el intervalo va de 0,02 a 0,53: son valores positivos, pero muy cercanos a 0. La asociación es pequeña.
+:::
+
+::: fragment
+**Suscriptores:** por cada 10.000 suscriptores adicionales, las visitas aumentan entre 1.640 y 1.750. Es un intervalo angosto: estimación muy precisa.
+:::
+
+::: fragment
+Recordar intuición: si repitiéramos el muestreo muchas veces, el 95% de los posibles intervalos construidos **contendría el verdadero valor poblacional**.
+:::
+
+------------------------------------------------------------------------
+
+## Intervalos de confianza: a mano {.smaller}
+
+::: fragment
+$$\hat{\beta_j} \pm c \cdot se(\hat{\beta_j}) \qquad c = t_{\alpha/2,\; n-k-1}$$
+:::
+
+::: fragment
+```{r}
+#| eval: true
+n <- nobs(m3)                   # número de observaciones
+k <- length(coef(m3)) - 1       # número de predictores (sin el intercepto)
+
+b_dur  <- coef(m3)["duracion"]
+se_dur <- summary(m3)$coefficients["duracion", "Std. Error"]
+
+# A mano con 1,96 (distribución normal)
+b_dur - 1.96 * se_dur   # Límite inferior
+b_dur + 1.96 * se_dur   # Límite superior
+```
+:::
+
+::: fragment
+```{r}
+#| eval: true
+# A mano con la distribución t
+t_val <- qt(0.975, n - k - 1)
+t_val   # 1,96: con n grande, t y normal prácticamente coinciden
+        # (en la clase, con n = 15, el valor t era 2,20)
+
+b_dur - t_val * se_dur  # Límite inferior
+b_dur + t_val * se_dur  # Límite superior
+
+```
+:::
+
+------------------------------------------------------------------------
+
+## Tabla de calidad {.smaller}
+
+::: fragment
+```{r}
+#| eval: true
+screenreg(l = list(m1, m2, m3),
+          single.row = FALSE,
+          stars = numeric(0),
+          ci.force = TRUE, # Adjuntamos intervalos de confianza al 95%
+          ci.test = NULL,
+          custom.model.names = c("Modelo 1", "Modelo 2", "Modelo 3"), # Indica nombre modelos
+          custom.coef.names = c("Intercepto", "Duración (min)", # Indica nombre variables
+                                "Largo título (caracteres)",
+                                "Suscriptores (decenas de miles)"),
+          digits = 2)
+```
+:::
+
+::: fragment
+Fíjense en el **largo del título**: en el Modelo 2 su intervalo incluye el 0; en el Modelo 3, ya no.
+:::
+
+------------------------------------------------------------------------
+
+## Gráfico de intervalos de confianza {.smaller}
+
+::: fragment
+Primero, con **R base**: extraemos lo que necesitamos del modelo.
+
+```{r}
+#| eval: true
+ic <- confint(m3)[-1, ]   # IC 95% sin el intercepto
+b  <- coef(m3)[-1]        # Coeficientes sin el intercepto
+y  <- length(b):1         # Posición en el eje Y (el primero queda arriba)
+```
+:::
+
+::: fragment
+```{r}
+#| eval: true
+#| fig-height: 3.8
+par(mar = c(5, 12, 3, 2))   # Margen izquierdo amplio para los nombres
+plot(b, y,
+     xlim = range(ic), pch = 19, yaxt = "n",
+     xlab = "Coeficiente (miles de visitas)", ylab = "",
+     main = "Coeficientes e IC al 95% (Modelo 3)")
+segments(ic[, 1], y, ic[, 2], y)       # Una línea por intervalo
+abline(v = 0, lty = 2, col = "red")    # Línea de referencia en 0
+axis(2, at = y, las = 1,
+     labels = c("Duración (min)", "Largo título", "Suscriptores (10 mil)"))
+par(mar = c(5, 4, 4, 2))    # Volvemos a los márgenes originales
+```
+:::
+------------------------------------------------------------------------
+
+## Gráfico de intervalos de confianza {.smaller}
+
+::: fragment
+Con **`coefplot`** (visto en la clase 15):
+
+```{r}
+#| eval: true
+#| fig-height: 4
+coefplot(m3, intercept = FALSE)
+```
+:::
+
+::: fragment
+Por defecto, `coefplot` dibuja ±1 (línea gruesa) y ±2 (línea fina) errores estándar; ±2 equivale aprox. al IC al 95%.
+:::
+
+------------------------------------------------------------------------
+
+**Muchas gracias!**
+
+Todas mis ayudantías y materiales disponibles en [**mi repositorio de GitHub**](https://github.com/izavalaaranguiz/ayudantias_sol515)
+
+------------------------------------------------------------------------
+
+## Apéndice: error estándar de la regresión {.smaller}
+
+::: fragment
+Es el **"Residual standard error"** de `summary()`: cuánto se equivoca el modelo, en promedio, en las unidades de $Y$ (miles de visitas).
+
+$$\hat{\sigma} = \sqrt{\frac{SSR}{n-k-1}}$$
+:::
+
+::: fragment
+```{r}
+#| eval: true
+ssr <- sum(residuals(m3)^2)     # suma de residuos al cuadrado
+
+sqrt(ssr / (n - k - 1))         # sigma a mano
+sigma(m3)                       # sigma directo del modelo
+```
+:::
+
+::: fragment
+El modelo se equivoca, en promedio, en unas **198 mil visitas** al predecir un video.
+:::
+
+------------------------------------------------------------------------
+
+## Apéndice: error estándar de un coeficiente {.smaller}
+
+::: fragment
+Distinto del anterior: mide la **precisión** con que estimamos un coeficiente (clase 14).
+
+$$se(\hat{\beta_j}) = \frac{\hat{\sigma}}{\sqrt{SST_j \, (1 - R_j^2)}}$$
+:::
+
+::: fragment
+```{r}
+#| eval: true
+# Lo hacemos para "duracion"
+sigma_m3 <- sigma(m3)                                          # sigma
+sst_dur  <- sum((videos$duracion - mean(videos$duracion))^2)   # SST de X
+r2_dur   <- summary(lm(duracion ~ largo_titulo + suscriptores,
+                       data = videos))$r.squared               # R²_j
+
+sigma_m3 / sqrt(sst_dur * (1 - r2_dur))   # Error estándar a mano
+summary(m3)$coefficients["duracion", "Std. Error"]   # Comparamos con lm()
+```
+:::
