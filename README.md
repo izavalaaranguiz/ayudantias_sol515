@@ -28,7 +28,7 @@ Caso: ¿qué se asocia con las visitas de un video de YouTube? (datos simulados)
 
 ### 📂 Cómo cargar la base de datos 
 
-La base `viral_videos.csv` (12.000 videos simulados, [fuente original en Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data), licencia CC0) se puede cargar en `RStudio` de dos formas. Elige la que te acomode:
+La base `viral_videos.csv` (12.000 videos simulados, [fuente original en Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data)) se puede cargar en `RStudio` de dos formas. Elige la que te acomode:
 
 ### Opción 1: desde tu computador
 
