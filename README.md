@@ -28,13 +28,13 @@ Caso: ¿qué se asocia con las visitas de un video de YouTube? (datos simulados)
 
 ### 📂 Cómo cargar la base de datos 
 
-La base `viral_videos.csv` (12.000 videos simulados, [fuente original en Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data)) se puede cargar en `RStudio` de dos formas. Elige la que te acomode:
+La base `viral_videos.csv` (12.000 videos simulados, [fuente original en Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data)) se puede cargar en `RStudio` de dos formas:
 
-### Opción 1: desde tu computador
+### Opción 1: desde el computador
 
-1. Descarga el archivo presionando [aquí](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia2/viral_videos.csv)
-2. Guárdalo en **la misma carpeta de tu script**.
-3. En `RStudio`, indica esa carpeta como directorio de trabajo: menú *Session → Set Working Directory → To Source File Location*.
+1. Descargar el archivo presionando [aquí](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia2/viral_videos.csv)
+2. Guardar en **la misma carpeta del script**.
+3. En `RStudio`, indicar esa carpeta como directorio de trabajo: menú *Session → Set Working Directory → To Source File Location*.
 4. Carga la base:
 
 ```r
@@ -43,7 +43,7 @@ videos <- read.csv("viral_videos.csv")
 
 ### Opción 2: directo desde GitHub (sin descargar nada)
 
-Necesitas conexión a internet. Carga la base con el link directo al archivo pegando esto en tu script de `RStudio`:
+Carga la base con el link directo al archivo pegando esto en tu script de `RStudio`:
 
 ```r
 videos <- read.csv("https://raw.githubusercontent.com/izavalaaranguiz/ayudantias_sol515/main/ayudantia2/viral_videos.csv")
