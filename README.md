@@ -14,6 +14,18 @@ lectura de `summary()`, cálculo de valores predichos y visualización de result
 [Ayudantía 1 — Regresión Lineal Simple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia1/ayudantia1_mrl.html)
 
 
+## Ayudantía 2 — Regresión Lineal Múltiple 📊
+
+📝 Aplicación de la regresión lineal múltiple en `RStudio`: preparación de
+los datos, estimación de modelos y lectura de `summary()`,
+interpretación de coeficientes, estimación e interpretación de
+intervalos de confianza al 95% y gráfico de coeficientes.
+
+Caso: ¿qué se asocia con las visitas de un video de YouTube? (datos simulados).
+
+[Ayudantía 2 — Regresión Lineal Múltiple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia2/ayudantia2_mrl.html)
+
+
 ### 📂 Cómo cargar la base de datos 
 
 La base `viral_videos.csv` (12.000 videos simulados, [fuente original en Kaggle](https://www.kaggle.com/datasets/vedauv/what-makes-a-yt-video-go-viral-12000-vids/data), licencia CC0) se puede cargar en `RStudio` de dos formas. Elige la que te acomode:
