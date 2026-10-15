@@ -14,7 +14,7 @@ lectura de `summary()`, cálculo de valores predichos y visualización de result
 [Ayudantía 1 — Regresión Lineal Simple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia1/ayudantia1_mrl.html)
 
 
-## Ayudantía 2 — Regresión Lineal Múltiple 📊
+## Ayudantía 2 — Regresión Lineal Múltiple e Intervalos de Confianza 📊
 
 📝 Aplicación de la regresión lineal múltiple en `RStudio`: preparación de
 los datos, estimación de modelos y lectura de `summary()`,
