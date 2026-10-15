@@ -31,7 +31,7 @@ videos <- read.csv("viral_videos.csv")
 
 ### Opción 2: directo desde GitHub (sin descargar nada)
 
-Necesitas conexión a internet. Carga la base con el link directo al archivo:
+Necesitas conexión a internet. Carga la base con el link directo al archivo pegando esto en tu script de `RStudio`:
 
 ```r
 videos <- read.csv("https://raw.githubusercontent.com/izavalaaranguiz/ayudantias_sol515/main/ayudantia2/viral_videos.csv")
