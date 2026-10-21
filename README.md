@@ -4,6 +4,11 @@
 
 ![](memelm.png)
 
+
+
+
+
+#
 ## Ayudantía 1 — Regresión Lineal Simple 📈​
 
 📝 Primera aproximación a la regresión lineal simple: sus fundamentos conceptuales
