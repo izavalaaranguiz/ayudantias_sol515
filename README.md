@@ -8,7 +8,7 @@
 
 
 
-#
+
 ## Ayudantía 1 — Regresión Lineal Simple 📈​
 
 📝 Primera aproximación a la regresión lineal simple: sus fundamentos conceptuales
@@ -18,7 +18,8 @@ lectura de `summary()`, cálculo de valores predichos y visualización de result
 
 [Ayudantía 1 — Regresión Lineal Simple](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia1/ayudantia1_mrl.html)
 
-#
+
+
 ## Ayudantía 2 — Regresión Lineal Múltiple e Intervalos de Confianza 📊
 
 📝 Aplicación de la regresión lineal múltiple en `RStudio`: preparación de
@@ -54,7 +55,7 @@ Carga la base con el link directo al archivo pegando esto en tu script de `RStud
 videos <- read.csv("https://raw.githubusercontent.com/izavalaaranguiz/ayudantias_sol515/main/ayudantia2/viral_videos.csv")
 ```
 
-#
+
 ## Ayudantía 3 — Preparación Ejercicio 1 🔎
 
 📝 Comentarios generales para resolver el [Ejercicio 1](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia3/Ejercicio1_2026.pdf), basado en el paper de
