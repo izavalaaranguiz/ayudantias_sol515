@@ -77,7 +77,7 @@ de regresión múltiple, regresión con valores predichos, test F con `library(c
 
 Usaremos dos bases:
 
-- `FinalDatasetForReplicationStata12.dta`: datos de Bautista et al. (2023), en formato Stata, que se carga con el paquete `foreign`.
+- `FinalDatasetForReplicationStata12.dta`: datos de Bautista et al. (2023), en formato Stata, que se carga con el paquete `foreign::read.dta()`.
 - `EVS_main.csv`: datos de Homola et al. (2020), de la European Values Survey (2008).
 
 ### Opción 1: desde el computador
