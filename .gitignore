@@ -7,3 +7,18 @@
 /.quarto/
 *_cache/
 .Rdata
+
+# Ayudantía 3: material solo para el ayudante (no subir)
+ayudantia3/*.R
+ayudantia3/*.doc
+ayudantia3/*.docx
+ayudantia3/Ejercicio 1_2024.pdf
+ayudantia3/Sobarzo-y-Zavala---Ejercicio-1-IC.pdf
+ayudantia3/guion_ayudantia3.md
+ayudantia3/organizacion_ayudantia3.md
+# Pantallazos de versiones anteriores que la presentación ya no usa
+ayudantia3/img/bautista_tabla3.png
+ayudantia3/img/bautista_medicion_registro.png
+ayudantia3/img/bautista_medicion_victimas.png
+ayudantia3/img/bautista_ecuacion_ponderador.png
+ayudantia3/img/homola_tabla1.png
