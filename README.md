@@ -55,13 +55,13 @@ videos <- read.csv("https://raw.githubusercontent.com/izavalaaranguiz/ayudantias
 ```
 ## Ayudantía 3 — Preparación Ejercicio 1 🔎
 
-📝 Comentarios generales para resolver el Ejercicio 1, basado en el paper de
+📝 Comentarios generales para resolver el [Ejercicio 1](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia3/Ejercicio1_2026.pdf), basado en el paper de
 [Bautista et al. (2023)](https://izavalaaranguiz.github.io/ayudantias_sol515/ayudantia3/bautista2021.pdf):
 idea general del argumento, preguntas guía para la lectura y preparación de la base de datos
 (filtro de la muestra con `MainSample` y uso del ponderador `Pop70` en `lm()`).
 
 Luego, un ejercicio de aplicación con el paper de Homola et al. (2020): estimación de modelos
-de regresión múltiple, regresión con valores predichos, test F y exportación de tablas de calidad a Word.
+de regresión múltiple, regresión con valores predichos, test F con `library(car)` y exportación de tablas de calidad a Word con `library(texreg)`.
 
 > Homola, J., Pereira, M. M., & Tavits, M. (2020). Legacies of the Third Reich: Concentration camps and out-group intolerance. *American Political Science Review, 114*(2), 573–590. https://doi.org/10.1017/S0003055419000832
 
